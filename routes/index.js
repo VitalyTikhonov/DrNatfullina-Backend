@@ -1,20 +1,20 @@
 const router = require('express').Router();
 
-const signup = require('./signup');
-const signin = require('./signin');
-const signout = require('./signout');
-const auth = require('../middleware/auth');
+const authRt = require('./auth');
+const authMw = require('../middleware/auth');
 const users = require('./users');
-const articles = require('./articles');
+const posts = require('./posts');
+const records = require('./records');
+const comments = require('./comments');
 const { BASE_PATH } = require('../configs/config');
 const NotFoundError = require('../errors/NotFoundError');
 
-router.use(`${BASE_PATH}signup`, signup);
-router.use(`${BASE_PATH}signin`, signin);
-router.use(`${BASE_PATH}signout`, signout);
-router.use(auth);
+router.use(`${BASE_PATH}auth`, authRt);
+router.use(authMw);
 router.use(`${BASE_PATH}users`, users);
-router.use(`${BASE_PATH}articles`, articles);
+router.use(`${BASE_PATH}posts`, posts);
+router.use(`${BASE_PATH}records`, records);
+router.use(`${BASE_PATH}comments`, comments);
 router.use((req, res, next) => next(new NotFoundError()));
 
 module.exports = router;
