@@ -1,94 +1,117 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
 const User = require('../models/user');
-const { JWT_SECRET, JWT_EXPIRY_DAYS, JWT_COOKIE_NAME } = require('../configs/config');
 const DocNotFoundError = require('../errors/DocNotFoundError');
-const EmailInUseError = require('../errors/EmailInUseError');
+const InUseError = require('../errors/InUseError');
 const InvalidInputError = require('../errors/InvalidInputError');
 
-function createUser(req, res, next) {
-  const {
-    email,
-    password,
-    name,
-  } = req.body;
-
-  bcrypt.hash(password, 10)
-    .then((hash) => {
-      User.create({
-        email,
-        password: hash,
-        name,
-      })
-        .then((respObj) => {
-          /* переменная с деструктуризацией const {свойства} = respObj удалена
-          для исключения ошибки линтинга */
-          res.send({
-            email: respObj.email,
-            name: respObj.name,
-            _id: respObj._id,
-          });
-        })
-        .catch((err) => {
-          if (err instanceof mongoose.Error.ValidationError) {
-            next(new InvalidInputError(err));
-          } else if (err.code === 11000) {
-            next(new EmailInUseError());
-          }
-        });
-    });
-}
-
-function login(req, res, next) {
-  const { email, password } = req.body;
-  return User.findByCredentials(email, password) // return!
-    .then((user) => {
-      const token = jwt.sign( // делаем токен
-        { _id: user._id },
-        // { _id: '5f59fd0c710b20e7857e392' }, // невалидный айди для тестирования
-        JWT_SECRET,
-        { expiresIn: `${JWT_EXPIRY_DAYS}d` },
-      );
-      res
-        .cookie(JWT_COOKIE_NAME, token, { // отправляем токен
-          maxAge: 3600000 * 24 * JWT_EXPIRY_DAYS,
-          httpOnly: true,
-          sameSite: true,
-        })
-        .send({ name: user.name });
-      // .end();
-    })
+function findUsers(req, res, next) {
+  const criteria = Object.fromEntries(Object.entries(req.body));
+  // User.find({ owner: req.user._id })
+  User.find(criteria)
+    .orFail(new DocNotFoundError('user'))
+    .then((respObj) => res.send(respObj))
     .catch(next);
 }
 
-function logout(req, res) {
-  res
-    .clearCookie(JWT_COOKIE_NAME)
-    .send({ message: 'Досвидосы!' });
-  // .end();
+function getUserById(req, res, next) {
+  return User.findById(req.params.id)
+    .orFail(new DocNotFoundError('user'))
+    .then((respObj) => {
+      res.send(respObj);
+    })
+    .catch(next);
 }
 
 function getCurrentUser(req, res, next) {
   const userId = req.user._id;
+  req.params.id = userId;
   /* идентификатор отправителя запроса (ПОДЧЕРКИВАНИЕ ПЕРЕД id!)
   (проверяется isObjectIdValid в auth) */
 
-  User.findById(userId)
-    .orFail(new DocNotFoundError('user'))
-    .then((respObj) => {
-      res.send({
-        email: respObj.email,
-        name: respObj.name,
+  getUserById(req, res, next);
+}
+
+function updateUser(req, res, next) {
+  try {
+    /* const fieldsObj = Object.fromEntries(Object.entries(req.body)); // если весь req.body – но
+    в таком случае через данный контроллер можно перезаписать и пароль, и другие системные поля,
+    что выглядит опасным, несмотря на то что на фронтенде не будет реализована отправка запросов
+    к этому контроллеру с полем пароля */
+    const {
+      firstName,
+      patronymic,
+      lastName,
+      phone,
+      avatar,
+      doctorNotes,
+    } = req.body;
+    User.findByIdAndUpdate(
+      req.params.id,
+      {
+        firstName,
+        patronymic,
+        lastName,
+        phone,
+        avatar,
+        doctorNotes,
+      },
+      {
+        new: true, // will instead give you the object after update was applied
+        runValidators: true,
+        upsert: false, // !!!!!!!!!!!!!
+
+        /* если omitUndefined: false (по умолчанию), то неопр поля сбрасываются (null).
+        Если при этом передаются пустые поля, которые являются в модели обязательными, то
+        запрос не выполняется (message: null).
+        Можно сделать false, чтобы использовать этот метод для сброса полей, но тогда
+        все незаполненные пользователем поля должны подставляться на фронтенде по дефолту
+        (а обязательные – в любом случае, впрочем это подразумевается валидацией на фронтенде).
+        Это все касается полей, буквально переданных вторым аргументом в findByIdAndUpdate со
+        значением undefined. Если поля там (во втором аргументе) просто нет, в базе оно
+        не меняется. */
+        omitUndefined: false,
+      },
+    )
+      .orFail(new DocNotFoundError('user'))
+      .then((respObj) => res.send(respObj))
+      .catch((err) => {
+        if (err instanceof mongoose.Error.ValidationError) {
+          next(new InvalidInputError(err));
+        } else if (err.code === 11000) {
+          // console.log('11000 Object.keys(err.keyValue)[0]', Object.keys(err.keyValue)[0]);
+          next(new InUseError(Object.keys(err.keyValue)[0]));
+        }
       });
-    })
-    .catch(next);
+  } catch (err) {
+    next(err);
+  }
+}
+
+function updateCurrentUser(req, res, next) {
+  const userId = req.user._id;
+  req.params.id = userId;
+  updateUser(req, res, next);
+}
+
+function deleteUser(req, res, next) {
+  try {
+    User.findById(req.params.id)
+      .orFail(new DocNotFoundError('user'))
+      .then((respObj) => {
+        respObj.deleteOne()
+          .then((deletedObj) => res.send(deletedObj));
+      })
+      .catch(next);
+  } catch (err) {
+    next(err);
+  }
 }
 
 module.exports = {
-  createUser,
-  login,
-  logout,
+  getUserById,
   getCurrentUser,
+  findUsers,
+  updateUser,
+  updateCurrentUser,
+  deleteUser,
 };

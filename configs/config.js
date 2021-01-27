@@ -2,15 +2,15 @@ require('dotenv').config();
 
 const {
   NODE_ENV,
-  PORT = 3001,
+  PORT = 3002,
   BASE_PATH = '/',
   JWT_SECRET_PROD,
   JWT_EXPIRY_DAYS = 7,
-  DATABASE_ADDRESS = 'mongodb://localhost:27017/news_explorer',
-  JWT_COOKIE_NAME = 'nexpl-jwt',
+  DATABASE_ADDRESS = 'mongodb://localhost:27017/dr-natfullina',
+  JWT_COOKIE_NAME = 'dr-natfullina-jwt',
 } = process.env;
 
-const JWT_SECRET_DEV = '3e43db7c07c391400256fbe0f17b732a593ccdebeab36d99689f2a60a7f56db7';
+const JWT_SECRET_DEV = '078ffdfaf42680c392bc584404455d3c0baaa5bcd54499096f039aa823c6d0bf';
 const JWT_SECRET = NODE_ENV === 'production' ? JWT_SECRET_PROD : JWT_SECRET_DEV;
 const CORS_ORIGINS = [
   'http://localhost:8080',
@@ -19,6 +19,13 @@ const CORS_ORIGINS = [
   'https://vitaliytikhonov.ru',
   'http://vitaliytikhonov.ru',
 ];
+
+const AUTH_COOKIE_CONFIG = {
+  maxAge: 3600000 * 24 * JWT_EXPIRY_DAYS,
+  httpOnly: true,
+  sameSite: true,
+  secure: NODE_ENV === 'production',
+};
 
 module.exports = {
   NODE_ENV,
@@ -29,4 +36,5 @@ module.exports = {
   JWT_EXPIRY_DAYS,
   JWT_COOKIE_NAME,
   CORS_ORIGINS,
+  AUTH_COOKIE_CONFIG,
 };

@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const { validatePostArticle, validateDeleteArticle } = require('../middleware/celeb-validate-req');
+const { validatePostArticle, validateIdInParams } = require('../middleware/celeb-validate-req');
 const { getAllArticles, createArticle, deleteArticle } = require('../controllers/articles');
 
 router.get('/', getAllArticles);
 router.post('/', validatePostArticle, createArticle);
-router.delete('/:articleId', validateDeleteArticle, deleteArticle);
+router.delete('/:articleId', validateIdInParams, deleteArticle);
 module.exports = router;

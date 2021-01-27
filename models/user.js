@@ -15,18 +15,6 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
-  role: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-  },
-  isVerified: {
-    type: Boolean,
-    required: true,
-  },
-  // PIDPermission: {
-  // },
   firstName: {
     type: String,
     required: true,
@@ -45,6 +33,18 @@ const userSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 30,
   },
+  role: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+  isEmailVerified: {
+    type: Boolean,
+    required: true,
+  },
+  // PIDPermission: {
+  // },
   phone: {
     type: String,
     required: false,
@@ -56,10 +56,12 @@ const userSchema = new mongoose.Schema({
     required: false,
     validate: (link) => validator.isURL(link),
   },
-  // recordId: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   required: true,
-  // },
+  doctorNotes: {
+    type: String,
+    required: false,
+    minlength: 1,
+    maxlength: 5000,
+  },
 });
 
 userSchema.statics.findByCredentials = function findByCredentials(email, password) {

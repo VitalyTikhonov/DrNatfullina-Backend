@@ -15,8 +15,7 @@ node_modules
 .vscode
 
 V_Tikhonov_Diploma_Backend.*
-DevNotes.txt
-DevNotes_Security.txt
+DevAux_*
 .env
 .envOFF
 nginx_config_backup
