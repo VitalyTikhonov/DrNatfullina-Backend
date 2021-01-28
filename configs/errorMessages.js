@@ -22,7 +22,7 @@ module.exports.errors = {
   notFound: 'Запрашиваемый ресурс не найден',
   docNotFound: {
     user: 'Такого пользователя нет',
-    article: 'Такой статьи нет',
+    post: 'Такой публикации нет',
   },
   unknownRequestor: 'Запрос сделан от имени несуществующего пользователя',
   noDocs: {

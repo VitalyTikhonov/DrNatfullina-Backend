@@ -1,6 +1,6 @@
 /* ИМПОРТ */
 const router = require('express').Router();
-const { validateNonstrictUserDataSet, validateIdInParams } = require('../middleware/celeb-validate-req');
+const { validateProvidedUserData, validateIdInParams } = require('../middleware/celeb-validate-req');
 
 const {
   findUsers,
@@ -13,11 +13,11 @@ const {
 } = require('../controllers/users');
 
 /* РУТЕРЫ */
-router.get('/', validateNonstrictUserDataSet, findUsers);
+router.get('/', validateProvidedUserData, findUsers);
 router.get('/me', getCurrentUser);
 router.get('/:id', validateIdInParams, getUserById);
-router.patch('/me', validateNonstrictUserDataSet, updateCurrentUser);
-router.patch('/:id', validateIdInParams, validateNonstrictUserDataSet, updateUser);
+router.patch('/me', validateProvidedUserData, updateCurrentUser);
+router.patch('/:id', validateIdInParams, validateProvidedUserData, updateUser);
 router.delete('/me', deleteCurrentUser);
 router.delete('/:id', validateIdInParams, deleteUser);
 
