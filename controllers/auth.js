@@ -25,60 +25,65 @@ function createUser(req, res, next) {
 
   const role = 'user';
   const isEmailVerified = false;
+  const isBanned = false;
+  const requestedDeletion = false;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => {
-      User.create({
-        email,
-        password: hash,
-        firstName,
-        patronymic,
-        lastName,
-        role,
-        isEmailVerified,
-        phone,
-        avatar,
-      })
-        .then((respObj) => {
-          /* переменная с деструктуризацией const {свойства} = respObj удалена
+  bcrypt.hash(password, 10).then((hash) => {
+    User.create({
+      email,
+      password: hash,
+      firstName,
+      patronymic,
+      lastName,
+      role,
+      isEmailVerified,
+      isBanned,
+      requestedDeletion,
+      phone,
+      avatar,
+    })
+      .then((respObj) => {
+        /* переменная с деструктуризацией const {свойства} = respObj удалена
           для исключения ошибки линтинга */
-          const token = jwt.sign( // делаем токен
-            { _id: respObj._id },
-            // { _id: '5f59fd0c710b20e7857e392' }, // невалидный айди для тестирования
-            JWT_SECRET,
-            { expiresIn: `${JWT_EXPIRY_DAYS}d` },
-          );
+        const token = jwt.sign(
+          // делаем токен
+          { _id: respObj._id },
+          // { _id: '5f59fd0c710b20e7857e392' }, // невалидный айди для тестирования
+          JWT_SECRET,
+          { expiresIn: `${JWT_EXPIRY_DAYS}d` },
+        );
 
-          res
-            .cookie(JWT_COOKIE_NAME, token, AUTH_COOKIE_CONFIG) // отправляем токен
-            .send({
-              email: respObj.email,
-              firstName: respObj.firstName,
-              patronymic: respObj.patronymic,
-              lastName: respObj.lastName,
-              role: respObj.role,
-              isEmailVerified: respObj.isEmailVerified,
-              phone: respObj.phone,
-              avatar: respObj.avatar,
-              _id: respObj._id,
-            });
-        })
-        .catch((err) => {
-          if (err instanceof mongoose.Error.ValidationError) {
-            next(new InvalidInputError(err));
-          } else if (err.code === 11000) {
-            // console.log('11000 Object.keys(err.keyValue)[0]', Object.keys(err.keyValue)[0]);
-            next(new InUseError(Object.keys(err.keyValue)[0]));
-          }
-        });
-    });
+        res
+          .cookie(JWT_COOKIE_NAME, token, AUTH_COOKIE_CONFIG) // отправляем токен
+          .send({
+            email: respObj.email,
+            firstName: respObj.firstName,
+            patronymic: respObj.patronymic,
+            lastName: respObj.lastName,
+            role: respObj.role,
+            isEmailVerified: respObj.isEmailVerified,
+            phone: respObj.phone,
+            avatar: respObj.avatar,
+            _id: respObj._id,
+          });
+      })
+      .catch((err) => {
+        if (err instanceof mongoose.Error.ValidationError) {
+          next(new InvalidInputError(err));
+        } else if (err.code === 11000) {
+          // console.log('11000 Object.keys(err.keyValue)[0]', Object.keys(err.keyValue)[0]);
+          next(new InUseError(Object.keys(err.keyValue)[0]));
+        }
+      });
+  });
 }
 
 function login(req, res, next) {
   const { email, password } = req.body;
   return User.findByCredentials(email, password) // return!
     .then((user) => {
-      const token = jwt.sign( // делаем токен
+      const token = jwt.sign(
+        // делаем токен
         { _id: user._id },
         // { _id: '5f59fd0c710b20e7857e392' }, // невалидный айди для тестирования
         JWT_SECRET,
@@ -92,10 +97,8 @@ function login(req, res, next) {
     .catch(next);
 }
 
-function logout(req, res) {
-  res
-    .clearCookie(JWT_COOKIE_NAME)
-    .send({ message: 'До свиданья!' });
+function logout(req, res, next) {
+  res.clearCookie(JWT_COOKIE_NAME).send({ message: 'До свиданья!' });
   // .end();
 }
 

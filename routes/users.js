@@ -9,15 +9,17 @@ const {
   getUserById,
   updateUser,
   deleteUser,
+  deleteCurrentUser,
 } = require('../controllers/users');
 
 /* РУТЕРЫ */
 router.get('/', validateNonstrictUserDataSet, findUsers);
 router.get('/me', getCurrentUser);
-router.patch('/me', validateNonstrictUserDataSet, updateCurrentUser);
 router.get('/:id', validateIdInParams, getUserById);
+router.patch('/me', validateNonstrictUserDataSet, updateCurrentUser);
 router.patch('/:id', validateIdInParams, validateNonstrictUserDataSet, updateUser);
-router.delete('/:id', deleteUser);
+router.delete('/me', deleteCurrentUser);
+router.delete('/:id', validateIdInParams, deleteUser);
 
 /* ЭКСПОРТ */
 module.exports = router;

@@ -52,7 +52,7 @@ const validateSignup = celebrate(
             'string.max': errors.tooLong(30),
           }),
         role: Joi.string()
-          .required()
+          // .required()
           .min(2)
           .max(30)
           .messages({
@@ -63,7 +63,7 @@ const validateSignup = celebrate(
             'string.max': errors.tooLong(30),
           }),
         isEmailVerified: Joi.boolean()
-          .required()
+          // .required()
           .messages({
             'string.base': errors.notString,
             'any.required': errors.missing.isEmailVerified,

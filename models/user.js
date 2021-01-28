@@ -43,6 +43,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  isBanned: {
+    type: Boolean,
+    required: true,
+  },
+  requestedDeletion: {
+    type: Boolean,
+    required: true,
+  },
   // PIDPermission: {
   // },
   phone: {

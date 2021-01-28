@@ -3,6 +3,7 @@ const User = require('../models/user');
 const DocNotFoundError = require('../errors/DocNotFoundError');
 const InUseError = require('../errors/InUseError');
 const InvalidInputError = require('../errors/InvalidInputError');
+const { JWT_COOKIE_NAME } = require('../configs/config');
 
 function findUsers(req, res, next) {
   const criteria = Object.fromEntries(Object.entries(req.body));
@@ -98,13 +99,22 @@ function deleteUser(req, res, next) {
     User.findById(req.params.id)
       .orFail(new DocNotFoundError('user'))
       .then((respObj) => {
-        respObj.deleteOne()
-          .then((deletedObj) => res.send(deletedObj));
+        respObj.deleteOne().then((deletedObj) => {
+          res.clearCookie(JWT_COOKIE_NAME).send({ message: 'Прощайте!' });
+          res.send(deletedObj);
+        });
       })
       .catch(next);
   } catch (err) {
     next(err);
   }
+}
+
+function deleteCurrentUser(req, res, next) {
+  // console.log('deleteCurrentUser', res.req.cookies);
+  const userId = req.user._id;
+  req.params.id = userId;
+  deleteUser(req, res, next);
 }
 
 module.exports = {
@@ -114,4 +124,5 @@ module.exports = {
   updateUser,
   updateCurrentUser,
   deleteUser,
+  deleteCurrentUser,
 };
