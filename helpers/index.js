@@ -9,7 +9,7 @@ function joinErrorMessages(errorObject) {
   const actualBadFields = Object.keys(errorObject.errors);
   const badFieldNumber = actualBadFields.length;
   const messageArray = [];
-  let jointErrorMessage = null;
+  let jointErrorMessage = errorObject; // to display the original error if it doesn't match my logic
   if (expectedBadFields.some((field) => actualBadFields.includes(field))) {
     expectedBadFields.forEach((field) => {
       if (actualBadFields.includes(field)) {

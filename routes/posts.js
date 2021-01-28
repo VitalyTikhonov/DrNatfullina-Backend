@@ -1,8 +1,10 @@
 const router = require('express').Router();
-const { validatePostArticle, validateIdInParams } = require('../middleware/celeb-validate-req');
-const { getAllArticles, createArticle, deleteArticle } = require('../controllers/articles');
+const { validatePost, validateIdInParams } = require('../middleware/celeb-validate-req');
+const { findPosts, getPost, createPost } = require('../controllers/posts');
 
-router.get('/', getAllArticles);
-router.post('/', validatePostArticle, createArticle);
-router.delete('/:articleId', validateIdInParams, deleteArticle);
+router.get('/', findPosts);
+router.get('/:id', validateIdInParams, getPost);
+router.post('/', validatePost, createPost);
+// router.patch('/:id', validateIdInParams, getAllArticles);
+// router.delete('/:id', validateIdInParams, deleteArticle);
 module.exports = router;

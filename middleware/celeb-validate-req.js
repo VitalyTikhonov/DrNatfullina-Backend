@@ -27,8 +27,8 @@ const validateSignup = celebrate(
           .max(30)
           .messages({
             'string.base': errors.notString,
-            'any.required': errors.missing.name,
-            'string.empty': errors.missing.name,
+            'any.required': errors.missing.firstName,
+            'string.empty': errors.missing.firstName,
             'string.min': errors.tooShort(2),
             'string.max': errors.tooLong(30),
           }),
@@ -77,10 +77,9 @@ const validateSignup = celebrate(
             'string.min': errors.tooShort(2),
             'string.max': errors.tooLong(30),
           }),
-        avatar: Joi.string()
-          .messages({
-            'string.base': errors.notString,
-          }),
+        avatar: Joi.string().messages({
+          'string.base': errors.notString,
+        }),
         doctorNotes: Joi.string()
           .min(1)
           .max(5000)
@@ -163,10 +162,9 @@ const validateNonstrictUserDataSet = celebrate(
             'string.min': errors.tooShort(2),
             'string.max': errors.tooLong(30),
           }),
-        avatar: Joi.string()
-          .messages({
-            'string.base': errors.notString,
-          }),
+        avatar: Joi.string().messages({
+          'string.base': errors.notString,
+        }),
         doctorNotes: Joi.string()
           .min(1)
           .max(5000)
@@ -181,55 +179,49 @@ const validateNonstrictUserDataSet = celebrate(
   { mode: 'full' }, // чтобы валидировались все типы полей (и body, и params и т. п.)
 );
 
-const validatePostArticle = celebrate(
+const validatePost = celebrate(
   {
     body: Joi.object()
       .options({ abortEarly: false })
       .keys({
-        keyword: Joi.string().required().messages({
-          'string.base': errors.notString,
-          'any.required': errors.missing.keyword,
-          'string.empty': errors.missing.keyword,
+        // не должно быть required, так как подставляется после приема запроса:
+        authorId: Joi.objectId().messages({
+          'any.required': errors.missing.authorId,
         }),
-        title: Joi.string().required().messages({
-          'string.base': errors.notString,
-          'any.required': errors.missing.title,
-          'string.empty': errors.missing.title,
-        }),
-        text: Joi.string().required().messages({
-          'string.base': errors.notString,
-          'any.required': errors.missing.text,
-          'string.empty': errors.missing.text,
-        }),
-        date: Joi.string().required().messages({
-          'string.base': errors.notString,
-          'any.required': errors.missing.date,
-          'string.empty': errors.missing.date,
-        }),
-        source: Joi.string().required().messages({
-          'string.base': errors.notString,
-          'any.required': errors.missing.source,
-          'string.empty': errors.missing.source,
-        }),
-        link: Joi.string()
+        name: Joi.string()
           .required()
+          .min(2)
+          .max(300)
           .messages({
             'string.base': errors.notString,
-            'any.required': errors.missing.link,
-            'string.empty': errors.missing.link,
-          })
-          .custom((value, helpers) => {
-            if (urlValidatorCheck(value)) {
-              return value;
-            }
-            return helpers.message(errors.badUrl.link);
+            'any.required': errors.missing.name,
+            'string.empty': errors.missing.name,
+            'string.min': errors.tooShort(2),
+            'string.max': errors.tooLong(300),
           }),
-        urlToImage: Joi.string()
+        text: Joi.string()
           .required()
+          .min(2)
+          .max(20000)
           .messages({
             'string.base': errors.notString,
-            'any.required': errors.missing.urlToImage,
-            'string.empty': errors.missing.urlToImage,
+            'any.required': errors.missing.text,
+            'string.empty': errors.missing.text,
+            'string.min': errors.tooShort(2),
+            'string.max': errors.tooLong(20000),
+          }),
+        categories: Joi.array().items(
+          Joi.string()
+            .min(2)
+            .max(30)
+            .messages({
+              'string.min': errors.tooShort(2),
+              'string.max': errors.tooLong(30),
+            }),
+        ),
+        coverPhoto: Joi.string()
+          .messages({
+            'string.base': errors.notString,
           })
           .custom((value, helpers) => {
             if (urlValidatorCheck(value)) {
@@ -237,6 +229,15 @@ const validatePostArticle = celebrate(
             }
             return helpers.message(errors.badUrl.urlToImage);
           }),
+        comments: Joi.array().items(
+          Joi.string()
+            .min(2)
+            .max(5000)
+            .messages({
+              'string.min': errors.tooShort(2),
+              'string.max': errors.tooLong(5000),
+            }),
+        ),
       }),
   },
   { warnings: true }, // просто чтобы позиционно распознавался следующий аргумент
@@ -264,6 +265,6 @@ module.exports = {
   validateSignup,
   validateSignin,
   validateNonstrictUserDataSet,
-  validatePostArticle,
+  validatePost,
   validateIdInParams,
 };
