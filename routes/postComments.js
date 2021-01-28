@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validatePostArticle, validateIdInParams } = require('../middleware/celeb-validate-req');
+const { validateIdInParams } = require('../middleware/celeb-validation-general');
 // const { getAllArticles, createArticle, deleteArticle } = require('../controllers/articles');
 
 // router.get('/', getAllArticles);

@@ -1,6 +1,7 @@
 /* ИМПОРТ */
 const router = require('express').Router();
-const { validateProvidedUserData, validateIdInParams } = require('../middleware/celeb-validate-req');
+const { validateProvidedUserData } = require('../middleware/celeb-validation-user');
+const { validateIdInParams } = require('../middleware/celeb-validation-general');
 
 const {
   findUsers,

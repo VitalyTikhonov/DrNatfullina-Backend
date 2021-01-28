@@ -1,5 +1,6 @@
 const router = require('express').Router();
-const { validatePost, validateIdInParams, validateProvidedPostData } = require('../middleware/celeb-validate-req');
+const { validatePost, validateProvidedPostData } = require('../middleware/celeb-validation-post');
+const { validateIdInParams } = require('../middleware/celeb-validation-general');
 const {
   findPosts,
   getPost,

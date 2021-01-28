@@ -1,7 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
 
-const { isObjectIdValid, urlValidatorCheck } = require('../helpers');
 const { errors } = require('../configs/errorMessages');
 
 const validateSignup = celebrate(
@@ -179,148 +178,8 @@ const validateProvidedUserData = celebrate(
   { mode: 'full' }, // чтобы валидировались все типы полей (и body, и params и т. п.)
 );
 
-const validatePost = celebrate(
-  {
-    body: Joi.object()
-      .options({ abortEarly: false })
-      .keys({
-        // не должно быть required, так как подставляется после приема запроса:
-        authorId: Joi.objectId().messages({
-          'any.required': errors.missing.authorId,
-        }),
-        name: Joi.string()
-          .required()
-          .min(2)
-          .max(300)
-          .messages({
-            'string.base': errors.notString,
-            'any.required': errors.missing.name,
-            'string.empty': errors.missing.name,
-            'string.min': errors.tooShort(2),
-            'string.max': errors.tooLong(300),
-          }),
-        text: Joi.string()
-          .required()
-          .min(2)
-          .max(20000)
-          .messages({
-            'string.base': errors.notString,
-            'any.required': errors.missing.text,
-            'string.empty': errors.missing.text,
-            'string.min': errors.tooShort(2),
-            'string.max': errors.tooLong(20000),
-          }),
-        categories: Joi.array().items(
-          Joi.string()
-            .min(2)
-            .max(30)
-            .messages({
-              'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(30),
-            }),
-        ),
-        coverPhoto: Joi.string()
-          .messages({
-            'string.base': errors.notString,
-          })
-          .custom((value, helpers) => {
-            if (urlValidatorCheck(value)) {
-              return value;
-            }
-            return helpers.message(errors.badUrl.urlToImage);
-          }),
-        comments: Joi.array().items(
-          Joi.string()
-            .min(2)
-            .max(5000)
-            .messages({
-              'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(5000),
-            }),
-        ),
-      }),
-  },
-  { warnings: true }, // просто чтобы позиционно распознавался следующий аргумент
-  { mode: 'full' }, // чтобы валидировались все типы полей (и body, и params и т. п.)
-);
-
-const validateProvidedPostData = celebrate(
-  {
-    body: Joi.object()
-      .options({ abortEarly: false })
-      .keys({
-        name: Joi.string()
-          .min(2)
-          .max(300)
-          .messages({
-            'string.base': errors.notString,
-            'string.min': errors.tooShort(2),
-            'string.max': errors.tooLong(300),
-          }),
-        text: Joi.string()
-          .min(2)
-          .max(20000)
-          .messages({
-            'string.base': errors.notString,
-            'string.min': errors.tooShort(2),
-            'string.max': errors.tooLong(20000),
-          }),
-        categories: Joi.array().items(
-          Joi.string()
-            .min(2)
-            .max(30)
-            .messages({
-              'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(30),
-            }),
-        ),
-        coverPhoto: Joi.string()
-          .messages({
-            'string.base': errors.notString,
-          })
-          .custom((value, helpers) => {
-            if (urlValidatorCheck(value)) {
-              return value;
-            }
-            return helpers.message(errors.badUrl.urlToImage);
-          }),
-        comments: Joi.array().items(
-          Joi.string()
-            .min(2)
-            .max(5000)
-            .messages({
-              'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(5000),
-            }),
-        ),
-      }),
-  },
-  { warnings: true }, // просто чтобы позиционно распознавался следующий аргумент
-  { mode: 'full' }, // чтобы валидировались все типы полей (и body, и params и т. п.)
-);
-
-const validateIdInParams = celebrate(
-  {
-    params: Joi.object()
-      .options({ abortEarly: false })
-      .keys({
-        id: Joi.custom((id, helpers) => {
-          if (isObjectIdValid(id)) {
-            return id;
-          }
-          return helpers.message(errors.objectId.general);
-        }),
-      }),
-  },
-  { warnings: true }, // просто чтобы позиционно распознавался следующий аргумент
-  // { mode: 'full' }, // чтобы валидировались все типы полей (и body, и params и т. п.)
-);
-
 module.exports = {
   validateSignup,
   validateSignin,
   validateProvidedUserData,
-  validatePost,
-  validateProvidedPostData,
-  validateIdInParams,
 };

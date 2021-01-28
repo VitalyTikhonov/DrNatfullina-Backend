@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateSignup, validateSignin } = require('../middleware/celeb-validate-req');
+const { validateSignup, validateSignin } = require('../middleware/celeb-validation-user');
 const { createUser, login, logout } = require('../controllers/auth');
 
 router.post('/signin', validateSignin, login);
