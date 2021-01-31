@@ -1,17 +1,16 @@
 const mongoose = require('mongoose');
-const comment = require('./postCommentSchema').schema;
 // const validator = require('validator');
 
 const recordEntry = new mongoose.Schema(
   {
-    userId: {
+    patientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user',
       required: true,
     },
     date: {
       type: Date,
-      required: false,
+      required: true,
     },
     location: {
       type: String,
@@ -20,11 +19,11 @@ const recordEntry = new mongoose.Schema(
       maxlength: 100,
     },
     issues: {
-      type: [String],
+      type: [{ type: String, minlength: 2, maxlength: 50 }],
       required: true,
     },
     comments: {
-      type: [comment],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'postComment' }],
       required: true,
     },
   },

@@ -21,6 +21,9 @@ module.exports = (err, req, res, next) => {
     });
   });
 
+  /* Не удалять! Полезно для определения типа ошибки Joi! */
+  // console.log(errObjArr.map((errObj) => errObj));
+
   const labelMessArray = errObjArr.map((errObj) => `${errObj.context.label} – ${errObj.message}`);
 
   const finalMessage = labelMessArray.join('; ');

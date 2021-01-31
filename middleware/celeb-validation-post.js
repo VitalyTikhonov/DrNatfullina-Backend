@@ -10,8 +10,10 @@ const validatePost = celebrate(
       .options({ abortEarly: false })
       .keys({
         // не должно быть required, так как подставляется после приема запроса:
-        authorId: Joi.objectId().messages({
+        authorId: Joi.objectId().required().messages({
+          'string.pattern.name': errors.objectId.author,
           'any.required': errors.missing.authorId,
+          'string.empty': errors.missing.authorId,
         }),
         name: Joi.string()
           .required()
@@ -35,15 +37,18 @@ const validatePost = celebrate(
             'string.min': errors.tooShort(2),
             'string.max': errors.tooLong(20000),
           }),
-        categories: Joi.array().items(
-          Joi.string()
-            .min(2)
-            .max(30)
-            .messages({
-              'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(30),
-            }),
-        ),
+        categories: Joi.array()
+          .required()
+          .items(
+            Joi.string()
+              .min(2)
+              .max(50)
+              .messages({
+                'string.min': errors.tooShort(2),
+                'string.max': errors.tooLong(50),
+              }),
+          )
+          .messages({ 'any.required': errors.missing.categories }),
         coverPhoto: Joi.string()
           .messages({
             'string.base': errors.notString,
@@ -54,15 +59,17 @@ const validatePost = celebrate(
             }
             return helpers.message(errors.badUrl.urlToImage);
           }),
-        comments: Joi.array().items(
-          Joi.string()
-            .min(2)
-            .max(5000)
-            .messages({
-              'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(5000),
-            }),
-        ),
+        comments: Joi.array()
+          .required()
+          .items(
+            Joi.string()
+              .min(2)
+              .max(5000)
+              .messages({
+                'string.min': errors.tooShort(2),
+                'string.max': errors.tooLong(5000),
+              }),
+          ),
       }),
   },
   { warnings: true }, // просто чтобы позиционно распознавался следующий аргумент
@@ -93,10 +100,10 @@ const validateProvidedPostData = celebrate(
         categories: Joi.array().items(
           Joi.string()
             .min(2)
-            .max(30)
+            .max(50)
             .messages({
               'string.min': errors.tooShort(2),
-              'string.max': errors.tooLong(30),
+              'string.max': errors.tooLong(50),
             }),
         ),
         coverPhoto: Joi.string()

@@ -1,61 +1,59 @@
 const mongoose = require('mongoose');
-const Post = require('../models/postSchema');
+const Record = require('../models/recordSchema');
+const User = require('../models/user');
 
 const DocNotFoundError = require('../errors/DocNotFoundError');
 const InvalidInputError = require('../errors/InvalidInputError');
 // const NoRightsError = require('../errors/NoRightsError');
 
-function findPosts(req, res, next) {
+function findRecords(req, res, next) {
   const criteria = Object.fromEntries(Object.entries(req.body));
-  Post.find(criteria)
-    .orFail(new DocNotFoundError('post'))
+  Record.find(criteria)
+    .orFail(new DocNotFoundError('record'))
     .then((respObj) => res.send(respObj))
     .catch(next);
 }
 
-function getPost(req, res, next) {
-  return Post.findById(req.params.id)
-    .orFail(new DocNotFoundError('post'))
+function getRecord(req, res, next) {
+  return Record.findById(req.params.id)
+    .orFail(new DocNotFoundError('record'))
     .then((respObj) => {
       res.send(respObj);
     })
     .catch(next);
 }
 
-function createPost(req, res, next) {
+async function createRecord(req, res, next) {
   try {
-    Post.create({
-      authorId: req.user._id,
-      ...req.body,
-      comments: [],
-    })
-      .then((respObj) => res.send(respObj))
-      .catch((err) => {
-        if (err instanceof mongoose.Error.ValidationError) {
-          return next(new InvalidInputError(err));
-        }
-        return next(err);
-      });
+    const userExists = await User.findById(req.body.patientId).orFail(
+      new DocNotFoundError('user'),
+    );
+    return (
+      userExists &&
+      Record.create(req.body)
+        .then((respObj) => res.send(respObj))
+        .catch((err) => {
+          if (err instanceof mongoose.Error.ValidationError) {
+            return next(new InvalidInputError(err));
+          }
+          return next(err);
+        })
+    );
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-function updatePost(req, res, next) {
+function updateRecord(req, res, next) {
   try {
-    const {
-      name,
-      text,
-      categories,
-      coverPhoto,
-    } = req.body;
-    Post.findByIdAndUpdate(
+    const { date, location, issues, comments } = req.body;
+    Record.findByIdAndUpdate(
       req.params.id,
       {
-        name,
-        text,
-        categories,
-        coverPhoto,
+        date,
+        location,
+        issues,
+        comments,
       },
       {
         new: true, // will instead give you the object after update was applied
@@ -74,7 +72,7 @@ function updatePost(req, res, next) {
         omitUndefined: false,
       },
     )
-      .orFail(new DocNotFoundError('post'))
+      .orFail(new DocNotFoundError('record'))
       .then((respObj) => res.send(respObj))
       .catch((err) => {
         if (err instanceof mongoose.Error.ValidationError) {
@@ -87,10 +85,10 @@ function updatePost(req, res, next) {
   }
 }
 
-function deletePost(req, res, next) {
+function deleteRecord(req, res, next) {
   try {
-    Post.findById(req.params.id)
-      .orFail(new DocNotFoundError('post'))
+    Record.findById(req.params.id)
+      .orFail(new DocNotFoundError('record'))
       .then((respObj) => {
         respObj.deleteOne().then((deletedObj) => res.send(deletedObj));
       })
@@ -101,9 +99,9 @@ function deletePost(req, res, next) {
 }
 
 module.exports = {
-  findPosts,
-  getPost,
-  createPost,
-  updatePost,
-  deletePost,
+  findRecords,
+  getRecord,
+  createRecord,
+  updateRecord,
+  deleteRecord,
 };

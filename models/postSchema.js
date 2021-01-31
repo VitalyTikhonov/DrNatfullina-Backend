@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema(
       maxlength: 20000,
     },
     categories: {
-      type: [String],
+      type: [{ type: String, minlength: 2, maxlength: 50 }],
       required: true,
     },
     coverPhoto: {
