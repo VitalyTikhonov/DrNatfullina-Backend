@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const comment = require('./postCommentSchema').schema;
 
 const postSchema = new mongoose.Schema(
   {
@@ -31,7 +30,7 @@ const postSchema = new mongoose.Schema(
       validate: (link) => validator.isURL(link),
     },
     comments: {
-      type: [comment],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'postComment' }],
       required: true,
     },
   },

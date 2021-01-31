@@ -23,7 +23,7 @@ const recordEntry = new mongoose.Schema(
       required: true,
     },
     comments: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'postComment' }],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'recordComment' }],
       required: true,
     },
   },

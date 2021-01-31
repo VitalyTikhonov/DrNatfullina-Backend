@@ -21,7 +21,8 @@ module.exports = {
     /* https://eslint.org/docs/rules/object-curly-newline
     сколько максимум свойств объекта можно писать в строку */
     "object-curly-newline": ["error", {
-      "ObjectExpression": { "multiline": true, "minProperties": 6 },
+      "ObjectExpression": "always",
+      // "ObjectExpression": { "multiline": true, "minProperties": 6 },
       "ObjectPattern": { "multiline": true, "minProperties": 6 },
       "ImportDeclaration": { "multiline": true, "minProperties": 6 },
       "ExportDeclaration": { "multiline": true, "minProperties": 6 },

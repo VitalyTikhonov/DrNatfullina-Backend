@@ -27,7 +27,6 @@ function createPost(req, res, next) {
     Post.create({
       authorId: req.user._id,
       ...req.body,
-      comments: [],
     })
       .then((respObj) => res.send(respObj))
       .catch((err) => {
